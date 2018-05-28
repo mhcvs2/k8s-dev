@@ -18,12 +18,15 @@ package volume
 
 import (
 	"github.com/golang/glog"
-	"github.com/kubernetes-incubator/external-storage/lib/controller"
+	"k8s-dev/lib/controller"
 	"k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/types"
 	"k8s.io/client-go/kubernetes"
 	"k8s.io/utils/exec"
+	"path/filepath"
+	"strings"
+	myutils "k8s-dev/utils"
 )
 
 const (
@@ -33,14 +36,15 @@ const (
 
 	// A PV annotation for the identity of the flexProvisioner that provisioned it
 	annProvisionerID = "Provisioner_Id"
+	fatherKey        = "share"
 )
 
 // NewFlexProvisioner creates a new flex provisioner
-func NewFlexProvisioner(client kubernetes.Interface, execCommand string) controller.Provisioner {
-	return newFlexProvisionerInternal(client, execCommand)
+func NewFlexProvisioner(client kubernetes.Interface, execCommand, flexVolumeDir, driver string) controller.Provisioner {
+	return newFlexProvisionerInternal(client, execCommand, flexVolumeDir, driver)
 }
 
-func newFlexProvisionerInternal(client kubernetes.Interface, execCommand string) *flexProvisioner {
+func newFlexProvisionerInternal(client kubernetes.Interface, execCommand, flexVolumeDir, driver string) *flexProvisioner {
 	var identity types.UID
 
 	provisioner := &flexProvisioner{
@@ -48,16 +52,24 @@ func newFlexProvisionerInternal(client kubernetes.Interface, execCommand string)
 		execCommand: execCommand,
 		identity:    identity,
 		runner:      exec.New(),
+		flexVolumeDir: flexVolumeDir,
+		driver: driver,
 	}
-
+	driverPath := filepath.Join(flexVolumeDir, strings.Replace(driver, "/", "~", 0))
+	cmd := provisioner.runner.Command("mkdir", "-p", driverPath)
+	cmd.Run()
+	err := myutils.CopyFile(filepath.Join(driverPath, filepath.Base(execCommand)), execCommand, 0755)
+	panic(err)
 	return provisioner
 }
 
 type flexProvisioner struct {
-	client      kubernetes.Interface
-	execCommand string
-	identity    types.UID
-	runner      exec.Interface
+	client        kubernetes.Interface
+	execCommand   string
+	identity      types.UID
+	runner        exec.Interface
+	flexVolumeDir string
+	driver        string
 }
 
 var _ controller.Provisioner = &flexProvisioner{}
@@ -74,10 +86,18 @@ func (p *flexProvisioner) Provision(options controller.VolumeOptions) (*v1.Persi
 	annotations[annCreatedBy] = createdBy
 
 	annotations[annProvisionerID] = string(p.identity)
-	/*
-		This PV won't work since there's nothing backing it.  the flex script
-		is in flex/flex/flex  (that many layers are required for the flex volume plugin)
-	*/
+
+	flexOptions := map[string]string{}
+	flexOptions[optionPVorVolumeName] = options.PVName
+
+	for key, value := range options.Parameters {
+		flexOptions[key] = value
+	}
+
+	if v, ok := options.Parameters[fatherKey]; ok {
+		flexOptions[fatherKey] = filepath.Join(v, options.PVName)
+	}
+
 	pv := &v1.PersistentVolume{
 		ObjectMeta: metav1.ObjectMeta{
 			Name:        options.PVName,
@@ -92,8 +112,8 @@ func (p *flexProvisioner) Provision(options controller.VolumeOptions) (*v1.Persi
 			},
 			PersistentVolumeSource: v1.PersistentVolumeSource{
 				FlexVolume: &v1.FlexPersistentVolumeSource{
-					Driver:   "flex",
-					Options:  map[string]string{},
+					Driver:   p.driver,
+					Options:  flexOptions,
 					ReadOnly: false,
 				},
 			},

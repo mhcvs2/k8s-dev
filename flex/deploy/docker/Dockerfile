@@ -26,4 +26,4 @@ COPY flex-provisioner /opt/storage_drivers/flex-provisioner
 
 ENTRYPOINT ["/opt/storage_drivers/flex-provisioner"]
 
-# "github.com/kubernetes-incubator/external-storage/lib/controller"
+# "k8s-dev/lib/controller"

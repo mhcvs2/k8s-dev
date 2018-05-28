@@ -21,14 +21,15 @@ import (
 	"strings"
 
 	"github.com/golang/glog"
-	vol "github.com/kubernetes-incubator/external-storage/flex/pkg/volume"
-	"github.com/kubernetes-incubator/external-storage/lib/controller"
+	vol "k8s-dev/flex/pkg/volume"
+	"k8s-dev/lib/controller"
 	"k8s.io/apimachinery/pkg/util/validation"
 	"k8s.io/apimachinery/pkg/util/validation/field"
 	"k8s.io/apimachinery/pkg/util/wait"
 	"k8s.io/client-go/kubernetes"
 	"k8s.io/client-go/rest"
 	"k8s.io/client-go/tools/clientcmd"
+	"os"
 )
 
 var (
@@ -38,10 +39,24 @@ var (
 	execCommand = flag.String("execCommand", "/opt/storage/flex-provision.sh", "The provisioner executable.")
 )
 
+const (
+	FLEXVOLUME_DIR_PATH = "FLEXVOLUME_DIR_PATH"
+	DRIVER = "DRIVER"
+)
+
+func GetEnv(name, defaultValue string) string {
+	if value := os.Getenv(name); value != "" {
+		return value
+	}
+	return defaultValue
+}
+
 func main() {
 	flag.Set("logtostderr", "true")
 	flag.Parse()
 
+	flexvolumeDir := GetEnv(FLEXVOLUME_DIR_PATH, "/var/lib/kubelet/volumeplugins")
+	driver := GetEnv(DRIVER, "flex")
 	if errs := validateProvisioner(*provisioner, field.NewPath("provisioner")); len(errs) != 0 {
 		glog.Fatalf("Invalid provisioner specified: %v", errs)
 	}
@@ -78,7 +93,7 @@ func main() {
 
 	// Create the provisioner: it implements the Provisioner interface expected by
 	// the controller
-	flexProvisioner := vol.NewFlexProvisioner(clientset, *execCommand)
+	flexProvisioner := vol.NewFlexProvisioner(clientset, *execCommand, flexvolumeDir, driver)
 
 	// Start the provision controller which will dynamically provision NFS PVs
 	pc := controller.NewProvisionController(

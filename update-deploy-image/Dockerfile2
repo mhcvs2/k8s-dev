@@ -1,0 +1,9 @@
+FROM registry.bst-1.cns.bstjpc.com:5000/k8s-client-go:v1.10
+
+RUN mkdir -p /go/src/update-deploy-image
+
+WORKDIR /go/src/update-deploy-image
+
+COPY main.go .
+
+RUN go install -v update-deploy-image

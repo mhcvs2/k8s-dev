@@ -22,7 +22,7 @@ func main() {
 	}
 
 	deployments, err := clientset.AppsV1beta1().Deployments(*ns).List(metav1.ListOptions{})
-	fmt.Println("deployments in namespace default:")
+	fmt.Printf("deployments in namespace %s:\n", *ns)
 	for _, deploy := range deployments.Items {
 		fmt.Println(deploy.Name)
 	}

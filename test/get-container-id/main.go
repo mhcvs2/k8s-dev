@@ -10,6 +10,7 @@ import (
 	myutils "k8s-dev/utils"
 	"k8s.io/client-go/tools/clientcmd"
 	"os"
+	"strings"
 )
 
 
@@ -47,5 +48,5 @@ func main() {
 	pod := pods.Items[0]
 	fmt.Println(pod.Name)
 	firstContainer := pod.Status.ContainerStatuses[0]
-	fmt.Println(firstContainer.ContainerID)
+	fmt.Println(strings.TrimLeft(firstContainer.ContainerID,"docker://"))
 }

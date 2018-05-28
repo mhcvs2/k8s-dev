@@ -15,8 +15,8 @@ import (
 
 
 func main() {
-	ns := flag.String("n", "kube-system", "namespace name")
-	label := flag.String("l", "k8s-app=kubernetes-dashboard", "namespace name")
+	ns := flag.String("n", "default", "namespace name")
+	label := flag.String("l", "", "namespace name")
 	flag.Parse()
 
 	kubeconfig := filepath.Join(myutils.HomeDir(), ".kube", "config")
@@ -35,7 +35,13 @@ func main() {
 	if err != nil {
 		panic(err.Error())
 	}
-	pods, err := clientset.CoreV1().Pods(*ns).List(metav1.ListOptions{LabelSelector: *label})
+	var lo metav1.ListOptions
+	if *label == "" {
+		lo = metav1.ListOptions{}
+	} else {
+		lo = metav1.ListOptions{LabelSelector: *label}
+	}
+	pods, err := clientset.CoreV1().Pods(*ns).List(lo)
 	podNum := len(pods.Items)
 	if podNum == 0 {
 		fmt.Println("null")
@@ -46,7 +52,6 @@ func main() {
 		os.Exit(0)
 	}
 	pod := pods.Items[0]
-	fmt.Println(pod.Name)
 	firstContainer := pod.Status.ContainerStatuses[0]
 	fmt.Println(strings.TrimLeft(firstContainer.ContainerID,"docker://"))
 }

@@ -1,0 +1,38 @@
+apiVersion: apps/v1beta2
+kind: Deployment
+metadata:
+  name: kubernetes-development
+  labels:
+    k8s-app: kubernetes-development
+  namespace: kube-system
+spec:
+  selector:
+    matchLabels:
+      k8s-app: kubernetes-development
+  template:
+    metadata:
+      labels:
+        k8s-app: kubernetes-development
+    spec:
+      containers:
+      - name: kubernetes-development
+        image: registry.bst-1.cns.bstjpc.com:5000/k8s-client-go:v1.10
+        command:
+          - bash
+          - -c
+          - "tail -f /dev/null"
+        volumeMounts:
+        - name: program
+          mountPath: /go/src/k8s-dev
+        - name: kubeconfig
+          mountPath: /root/.kube
+      volumes:
+      - name: program
+        hostPath:
+          path: /data/lib/gopath/src/k8s-dev
+      - name: kubeconfig
+        hostPath:
+          path: /root/.kube
+      serviceAccountName: default
+      nodeSelector:
+        kubernetes.io/hostname: k8s-m1

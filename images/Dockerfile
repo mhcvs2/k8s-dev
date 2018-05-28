@@ -5,3 +5,4 @@ WORKDIR /go/src
 COPY github.com/kubernetes-incubator /go/src/kubernetes-incubator
 COPY k8s.io/utils /go/src/k8s.io/utils
 COPY k8s.io/kubernetes /go/src/k8s.io/kubernetes
+COPY k8s.io/kube-openapi /go/src/k8s.io/kube-openapi

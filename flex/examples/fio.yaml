@@ -1,31 +1,42 @@
-apiVersion: apps/v1beta1
+apiVersion: apps/v1beta2
 kind: Deployment
 metadata:
-  name: cephfs-test1
+  name: cephfs-flex-provisioner
   labels:
-    app: cephfs-test1
+    k8s-app: cephfs-flex-provisioner
+  namespace: kube-system
 spec:
-  strategy:
-    type: Recreate
+  selector:
+    matchLabels:
+      k8s-app: cephfs-flex-provisioner
   template:
     metadata:
       labels:
-        app: cephfs-test1
+        k8s-app: cephfs-flex-provisioner
     spec:
-#      nodeSelector:
-#        kubernetes.io/hostname: k8s-n1
+      hostNetwork: true
       containers:
-      - image: registry.bst-1.cns.bstjpc.com:5000/clusterhq/fio-tool:latest
-        name: fio
+      - name: cephfs-flex-provisioner
+        image: registry.bst-1.cns.bstjpc.com:5000/flex-provisioner:20180529
+        imagePullPolicy: Always
+        securityContext:
+          privileged: true
         command:
-        - bash
-        - -c
-        - "tail -f /dev/null"
+          - bash
+          - -c
+          - "tail -f /dev/null"
         volumeMounts:
-        - name: fio-test-pv
-          mountPath: /data
+        - name: program
+          mountPath: /go/src/k8s-dev
+        - name: kubeconfig
+          mountPath: /root/.kube
       volumes:
-      - name: fio-test-pv
-#        emptyDir: {}
-        persistentVolumeClaim:
-          claimName: test-pv1
+      - name: program
+        hostPath:
+          path: /data/lib/gopath/src/k8s-dev
+      - name: kubeconfig
+        hostPath:
+          path: /root/.kube
+      serviceAccountName: default
+      nodeSelector:
+        kubernetes.io/hostname: k8s-m1

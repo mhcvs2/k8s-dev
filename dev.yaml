@@ -17,7 +17,8 @@ spec:
       containers:
       - name: kubernetes-development
 #        image: registry.bst-1.cns.bstjpc.com:5000/k8s-client-go:v1.10
-        image: registry.bst-1.cns.bstjpc.com:5000/k8s-dev:v1.10
+#        image: registry.bst-1.cns.bstjpc.com:5000/k8s-dev:v1.10
+        image: registry.bst-1.cns.bstjpc.com:5000/debian:stretch-slim
         imagePullPolicy: Always
         command:
           - bash

@@ -150,54 +150,55 @@ provision(){
 delete(){
     debug "delete() called"
     debug $1
-#	MDS=$(echo $1 | jq -r '.mds')
-#	MONITOR=$(echo $1 | jq -r '.monitors')
-#    SHARE=$(echo $1 | jq -r '.share')
-#	if [[ "$SHARE" == "null" ]]
-#	then
-#		SHARE=/$(echo $1 | jq -r '.["srcb.com/pvOrVolumeName"]')
-#	fi
-#
-#	AUTH_ID=$(echo $1 | jq -r '.authid')
-#	KEYRING=$(echo $1 | jq -r '.["kubernetes.io/secret/keyring"]')
-#
-#	# If value of keyring  is null it means secret not present. Try to parse it
-#	# from an option instead of a secret
-#	if [[ ${KEYRING} == 'null' ]]; then
-#		KEYRING=$(echo $1 | jq -r '.keyring')
-#	fi
-#
-#	# If keyring is still null, it means there is no keyring. Abort
-#	if [[ ${KEYRING} == 'null' ]]; then
-#		err "{ \"status\": \"Failure\", \"message\": \"Failed to mount CephFS share ${SHARE} at ${MNTPATH} due to no keyring\"}"
-#		exit 1
-#	fi
-#
-#	# Ensure only root can read the keyring file
-#	current_umask=$(umask)
-#	umask 077
-#	# Write keyring to file
-#	KEYRING_PATH="/var/run/cephfs/${AUTH_ID}/ceph.client.${AUTH_ID}.keyring"
-#	mkdir -p "/var/run/cephfs/${AUTH_ID}"
-#	echo $KEYRING  > $KEYRING_PATH
-#	umask $current_umask
-#
-#		mount -t ceph  ${MONITOR}:/ ${TMPDIR} -o mds_namespace=${MDS},name=${AUTH_ID},secretfile=${KEYRING_PATH}
-#    if [ $? -ne 0 ]; then
-#       err "{ \"status\": \"Failure\", \"message\": \"Failed to mount CephFS share $MONITOR:${SHARE} at ${MNTPATH}\"}"
-#       exit 1
-#    fi
-#
-#	rm -rf ${TMPDIR}${SHARE}
-#	if [ $? -ne 0 ]; then
-#	   err "{ \"status\": \"Failure\", \"message\": \"Failed to mount CephFS share $MONITOR:${SHARE} at ${MNTPATH}\"}"
-#	   exit 1
-#	fi
-#    umount ${TMPDIR} && rm -rf ${TMPDIR}
-#    if [ $? -ne 0 ]; then
-#        err "{ \"status\": \"Failure\", \"message\": \"Failed to mount CephFS share $MONITOR:${SHARE} at ${MNTPATH}\"}"
-#        exit 1
-#    fi
+
+	MDS=$(echo $1 | jq -r '.mds')
+	MONITOR=$(echo $1 | jq -r '.monitors')
+    SHARE=$(echo $1 | jq -r '.share')
+	if [[ "$SHARE" == "null" ]]
+	then
+		SHARE=/$(echo $1 | jq -r '.["srcb.com/pvOrVolumeName"]')
+	fi
+
+	AUTH_ID=$(echo $1 | jq -r '.authid')
+	KEYRING=$(echo $1 | jq -r '.["kubernetes.io/secret/keyring"]')
+
+	# If value of keyring  is null it means secret not present. Try to parse it
+	# from an option instead of a secret
+	if [[ ${KEYRING} == 'null' ]]; then
+		KEYRING=$(echo $1 | jq -r '.keyring')
+	fi
+
+	# If keyring is still null, it means there is no keyring. Abort
+	if [[ ${KEYRING} == 'null' ]]; then
+		err "{ \"status\": \"Failure\", \"message\": \"Failed to mount CephFS share ${SHARE} at ${MNTPATH} due to no keyring\"}"
+		exit 1
+	fi
+
+	# Ensure only root can read the keyring file
+	current_umask=$(umask)
+	umask 077
+	# Write keyring to file
+	KEYRING_PATH="/var/run/cephfs/${AUTH_ID}/ceph.client.${AUTH_ID}.keyring"
+	mkdir -p "/var/run/cephfs/${AUTH_ID}"
+	echo $KEYRING  > $KEYRING_PATH
+	umask $current_umask
+
+		mount -t ceph  ${MONITOR}:/ ${TMPDIR} -o mds_namespace=${MDS},name=${AUTH_ID},secretfile=${KEYRING_PATH}
+    if [ $? -ne 0 ]; then
+       err "{ \"status\": \"Failure\", \"message\": \"Failed to mount CephFS share $MONITOR:${SHARE} at ${MNTPATH}\"}"
+       exit 1
+    fi
+
+	rm -rf ${TMPDIR}${SHARE}
+	if [ $? -ne 0 ]; then
+	   err "{ \"status\": \"Failure\", \"message\": \"Failed to mount CephFS share $MONITOR:${SHARE} at ${MNTPATH}\"}"
+	   exit 1
+	fi
+    umount ${TMPDIR} && rm -rf ${TMPDIR}
+    if [ $? -ne 0 ]; then
+        err "{ \"status\": \"Failure\", \"message\": \"Failed to mount CephFS share $MONITOR:${SHARE} at ${MNTPATH}\"}"
+        exit 1
+    fi
 
     log "{\"status\": \"Success\"}"
     exit 0

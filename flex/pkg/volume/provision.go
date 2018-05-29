@@ -56,7 +56,7 @@ func newFlexProvisionerInternal(client kubernetes.Interface, execCommand, flexVo
 		flexVolumeDir: flexVolumeDir,
 		driver: driver,
 	}
-	driverPath := filepath.Join(flexVolumeDir, strings.Replace(driver, "/", "~", 0))
+	driverPath := filepath.Join(flexVolumeDir, strings.Replace(driver, "/", "~", 1))
 	cmd := provisioner.runner.Command("mkdir", "-p", driverPath)
 	cmd.Run()
 	err := myutils.CopyFile(filepath.Join(driverPath, filepath.Base(execCommand)), execCommand, 0755)

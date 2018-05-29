@@ -20,3 +20,4 @@ make
 
 You can use the example provisioner pod to deploy ```kubectl create -f examples/pod-provisioner.yaml```
 
+DRIVER=srcb/cephfs ./flex-provisioner -execCommand /go/src/k8s-dev/flex/deploy/cephfs -provisioner srcb.com/cephfs 

@@ -89,21 +89,21 @@ domount() {
 	# Expect the conf file to be written in /etc/ceph/ceph.conf	which is where the
 	# ceph puppet module installs the file.
 	TMPDIR=$(mktemp -d)
-
-	mount -t ceph  ${MONITOR}:/ ${TMPDIR} -o mds_namespace=${MDS},name=${AUTH_ID},secretfile=${KEYRING_PATH}
+    debug "tmp dir is $TMPDIR"
+	output=$(mount -t ceph  ${MONITOR}:/ ${TMPDIR} -o mds_namespace=${MDS},name=${AUTH_ID},secretfile=${KEYRING_PATH})
     if [ $? -ne 0 ]; then
-       err "{ \"status\": \"Failure\", \"message\": \"Failed to mount CephFS share $MONITOR:${SHARE} at ${MNTPATH}\"}"
+       err "{ \"status\": \"Failure\", \"message\": \"Failed to mount CephFS share $MONITOR:/ at ${TMPDIR}:${output}\"}"
        exit 1
     fi
 
 	mkdir -p ${TMPDIR}${SHARE}
 	if [ $? -ne 0 ]; then
-	   err "{ \"status\": \"Failure\", \"message\": \"Failed to mount CephFS share $MONITOR:${SHARE} at ${MNTPATH}\"}"
+	   err "{ \"status\": \"Failure\", \"message\": \"Failed to mount CephFS share $MONITOR:/ at ${TMPDIR}\"}"
 	   exit 1
 	fi
     umount ${TMPDIR} && rm -rf ${TMPDIR}
     if [ $? -ne 0 ]; then
-        err "{ \"status\": \"Failure\", \"message\": \"Failed to mount CephFS share $MONITOR:${SHARE} at ${MNTPATH}\"}"
+        err "{ \"status\": \"Failure\", \"message\": \"Failed to mount CephFS share $MONITOR:/ at ${TMPDIR}\"}"
         exit 1
     fi
 
@@ -183,20 +183,22 @@ delete(){
 	echo $KEYRING  > $KEYRING_PATH
 	umask $current_umask
 
-		mount -t ceph  ${MONITOR}:/ ${TMPDIR} -o mds_namespace=${MDS},name=${AUTH_ID},secretfile=${KEYRING_PATH}
+	TMPDIR=$(mktemp -d)
+    debug "tmp dir is $TMPDIR"
+	output=$(mount -t ceph  ${MONITOR}:/ ${TMPDIR} -o mds_namespace=${MDS},name=${AUTH_ID},secretfile=${KEYRING_PATH})
     if [ $? -ne 0 ]; then
-       err "{ \"status\": \"Failure\", \"message\": \"Failed to mount CephFS share $MONITOR:${SHARE} at ${MNTPATH}\"}"
+       err "{ \"status\": \"Failure\", \"message\": \"Failed to mount CephFS share $MONITOR:/ at ${TMPDIR}:${output}\"}"
        exit 1
     fi
 
 	rm -rf ${TMPDIR}${SHARE}
 	if [ $? -ne 0 ]; then
-	   err "{ \"status\": \"Failure\", \"message\": \"Failed to mount CephFS share $MONITOR:${SHARE} at ${MNTPATH}\"}"
+	   err "{ \"status\": \"Failure\", \"message\": \"Failed to mount CephFS share $MONITOR:/ at ${TMPDIR}\"}"
 	   exit 1
 	fi
     umount ${TMPDIR} && rm -rf ${TMPDIR}
     if [ $? -ne 0 ]; then
-        err "{ \"status\": \"Failure\", \"message\": \"Failed to mount CephFS share $MONITOR:${SHARE} at ${MNTPATH}\"}"
+        err "{ \"status\": \"Failure\", \"message\": \"Failed to mount CephFS share $MONITOR:/ at ${TMPDIR}\"}"
         exit 1
     fi
 

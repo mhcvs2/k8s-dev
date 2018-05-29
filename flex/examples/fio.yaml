@@ -1,0 +1,31 @@
+apiVersion: apps/v1beta1
+kind: Deployment
+metadata:
+  name: cephfs-test1
+  labels:
+    app: cephfs-test1
+spec:
+  strategy:
+    type: Recreate
+  template:
+    metadata:
+      labels:
+        app: cephfs-test1
+    spec:
+#      nodeSelector:
+#        kubernetes.io/hostname: k8s-n1
+      containers:
+      - image: registry.bst-1.cns.bstjpc.com:5000/clusterhq/fio-tool:latest
+        name: fio
+        command:
+        - bash
+        - -c
+        - "tail -f /dev/null"
+        volumeMounts:
+        - name: fio-test-pv
+          mountPath: /data
+      volumes:
+      - name: fio-test-pv
+#        emptyDir: {}
+        persistentVolumeClaim:
+          claimName: test-pv1

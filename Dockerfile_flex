@@ -1,6 +1,6 @@
 FROM registry.bst-1.cns.bstjpc.com:5000/k8s-dev:v1.10 as build
 
-RUN mkdir -p /go/src/k8s-dev/flex
+RUN mkdir -p /go/src/k8s-dev && rm -rf /go/src/github.com/golang/glog
 
 COPY flex /go/src/k8s-dev/flex
 COPY lib /go/src/k8s-dev/lib

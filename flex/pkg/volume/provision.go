@@ -68,6 +68,8 @@ var _ controller.Provisioner = &flexProvisioner{}
 // Provision creates a volume i.e. the storage asset and returns a PV object for
 // the volume.
 func (p *flexProvisioner) Provision(options controller.VolumeOptions) (*v1.PersistentVolume, error) {
+	options.PVName = options.PVC.GetName()
+	glog.Infof("Provision pv: %s\n", options.PVName)
 	err := p.createVolume(options)
 	if err != nil {
 		return nil, err

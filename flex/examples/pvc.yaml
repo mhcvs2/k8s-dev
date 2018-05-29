@@ -2,9 +2,10 @@ kind: PersistentVolumeClaim
 apiVersion: v1
 metadata:
   name: test-pv1
-  annotations:
-    volume.beta.kubernetes.io/storage-class: default-shared 
+#  annotations:
+#    volume.beta.kubernetes.io/storage-class: test-cephfs
 spec:
+  storageClassName: test-cephfs
   accessModes:
     - ReadWriteMany
   resources:

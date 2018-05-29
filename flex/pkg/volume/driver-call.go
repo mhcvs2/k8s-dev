@@ -29,7 +29,7 @@ const (
 	provisionCmd = "provision"
 	deleteCmd    = "delete"
 
-	optionPVorVolumeName = "kubernetes.io/pvOrVolumeName"
+	optionPVorVolumeName = "srcb.com/pvOrVolumeName"
 )
 
 // ErrorTimeout defines the time error

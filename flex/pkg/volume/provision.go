@@ -44,7 +44,7 @@ func NewFlexProvisioner(client kubernetes.Interface, execCommand, driver string)
 
 func newFlexProvisionerInternal(client kubernetes.Interface, execCommand, driver string) *flexProvisioner {
 	var identity types.UID
-	glog.Infof("Driver name is: %s\n", driver)
+	glog.Infof("Driver name is  : %s\n", driver)
 	provisioner := &flexProvisioner{
 		client:      client,
 		execCommand: execCommand,

@@ -224,6 +224,12 @@ case "$op" in
 	unmount)
 		unmount $*
 		;;
+	provision)
+		provision $*
+		;;
+	delete)
+		delete $*
+		;;
 	*)
 		log "{ \"status\": \"Not supported\" }"
 		exit 0

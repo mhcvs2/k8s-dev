@@ -1,6 +1,11 @@
 apiVersion: storage.k8s.io/v1
 kind: StorageClass
 metadata:
-  name: default-shared 
-provisioner: external/flex-simple 
+  name: test-cephfs
+provisioner: srcb.com/cephfs
 parameters:
+  monitors: 109.105.1.208:6789,109.105.1.209:6789,109.105.1.253:6789,109.105.1.254:6789,109.105.30.157:6789
+  share: '/test-cephfs'
+  authid: 'admin'
+  mds: 'Data_Intelligence_Labfs'
+  keyring: 'AQDeUgJbJgwNMhAAnzeW5LwQSwqMyWs7Zvl5cQ=='

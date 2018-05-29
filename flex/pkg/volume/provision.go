@@ -59,7 +59,9 @@ func newFlexProvisionerInternal(client kubernetes.Interface, execCommand, flexVo
 	cmd := provisioner.runner.Command("mkdir", "-p", driverPath)
 	cmd.Run()
 	err := myutils.CopyFile(filepath.Join(driverPath, filepath.Base(execCommand)), execCommand, 0755)
-	panic(err)
+	if err != nil {
+		panic(err)
+	}
 	return provisioner
 }
 

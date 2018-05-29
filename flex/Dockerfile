@@ -1,0 +1,16 @@
+FROM registry.bst-1.cns.bstjpc.com:5000/k8s-dev:v1.10 as build
+
+RUN mkdir -p /go/src/k8s-dev/flex
+
+COPY . /go/src/k8s-dev/flex
+
+WORKDIR /go/src/k8s-dev/flex/cmd/flex-provisioner
+
+RUN go build
+
+FROM registry.bst-1.cns.bstjpc.com:5000/debian:stretch-slim
+
+COPY --from=build /go/src/k8s-dev/flex/cmd/flex-provisioner/flex-provisioner /usr/bin/flex-provisioner
+
+RUN apt-get update && \
+    apt-get install jq -y

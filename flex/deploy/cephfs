@@ -174,18 +174,9 @@ delete(){
 		exit 1
 	fi
 
-	# Ensure only root can read the keyring file
-	current_umask=$(umask)
-	umask 077
-	# Write keyring to file
-	KEYRING_PATH="/var/run/cephfs/${AUTH_ID}/ceph.client.${AUTH_ID}.keyring"
-	mkdir -p "/var/run/cephfs/${AUTH_ID}"
-	echo $KEYRING  > $KEYRING_PATH
-	umask $current_umask
-
 	TMPDIR=$(mktemp -d)
     debug "tmp dir is $TMPDIR"
-	output=$(mount -t ceph  ${MONITOR}:/ ${TMPDIR} -o mds_namespace=${MDS},name=${AUTH_ID},secretfile=${KEYRING_PATH})
+	output=$(mount -t ceph  ${MONITOR}:/ ${TMPDIR} -o mds_namespace=${MDS},name=${AUTH_ID},secret=${KEYRING})
     if [ $? -ne 0 ]; then
        err "{ \"status\": \"Failure\", \"message\": \"Failed to mount CephFS share $MONITOR:/ at ${TMPDIR}:${output}\"}"
        exit 1

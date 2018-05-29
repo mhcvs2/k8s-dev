@@ -141,6 +141,7 @@ unmount() {
 # provisions a volume
 provision(){
     debug "provision() called"
+    debug $1
     log "{\"status\": \"Success\"}"
     exit 0
 }
@@ -154,7 +155,7 @@ delete(){
 #    SHARE=$(echo $1 | jq -r '.share')
 #	if [[ "$SHARE" == "null" ]]
 #	then
-#		SHARE=/$(echo $1 | jq -r '.["kubernetes.io/pvOrVolumeName"]')
+#		SHARE=/$(echo $1 | jq -r '.["srcb.com/pvOrVolumeName"]')
 #	fi
 #
 #	AUTH_ID=$(echo $1 | jq -r '.authid')

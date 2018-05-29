@@ -25,8 +25,6 @@ import (
 	"k8s.io/client-go/kubernetes"
 	"k8s.io/utils/exec"
 	"path/filepath"
-	"strings"
-	myutils "k8s-dev/utils"
 )
 
 const (
@@ -40,28 +38,19 @@ const (
 )
 
 // NewFlexProvisioner creates a new flex provisioner
-func NewFlexProvisioner(client kubernetes.Interface, execCommand, flexVolumeDir, driver string) controller.Provisioner {
-	return newFlexProvisionerInternal(client, execCommand, flexVolumeDir, driver)
+func NewFlexProvisioner(client kubernetes.Interface, execCommand, driver string) controller.Provisioner {
+	return newFlexProvisionerInternal(client, execCommand, driver)
 }
 
-func newFlexProvisionerInternal(client kubernetes.Interface, execCommand, flexVolumeDir, driver string) *flexProvisioner {
+func newFlexProvisionerInternal(client kubernetes.Interface, execCommand, driver string) *flexProvisioner {
 	var identity types.UID
-	glog.Infof("FlexVolumeDir is: %s\n", flexVolumeDir)
 	glog.Infof("Driver name is: %s\n", driver)
 	provisioner := &flexProvisioner{
 		client:      client,
 		execCommand: execCommand,
 		identity:    identity,
 		runner:      exec.New(),
-		flexVolumeDir: flexVolumeDir,
 		driver: driver,
-	}
-	driverPath := filepath.Join(flexVolumeDir, strings.Replace(driver, "/", "~", 1))
-	cmd := provisioner.runner.Command("mkdir", "-p", driverPath)
-	cmd.Run()
-	err := myutils.CopyFile(filepath.Join(driverPath, filepath.Base(execCommand)), execCommand, 0755)
-	if err != nil {
-		panic(err)
 	}
 	return provisioner
 }
@@ -71,7 +60,6 @@ type flexProvisioner struct {
 	execCommand   string
 	identity      types.UID
 	runner        exec.Interface
-	flexVolumeDir string
 	driver        string
 }
 

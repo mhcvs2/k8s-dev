@@ -40,7 +40,6 @@ var (
 )
 
 const (
-	FLEXVOLUME_DIR_PATH = "FLEXVOLUME_DIR_PATH"
 	DRIVER = "DRIVER"
 )
 
@@ -55,7 +54,6 @@ func main() {
 	flag.Set("logtostderr", "true")
 	flag.Parse()
 
-	flexvolumeDir := GetEnv(FLEXVOLUME_DIR_PATH, "/var/lib/kubelet/volumeplugins")
 	driver := GetEnv(DRIVER, "flex")
 	if errs := validateProvisioner(*provisioner, field.NewPath("provisioner")); len(errs) != 0 {
 		glog.Fatalf("Invalid provisioner specified: %v", errs)
@@ -93,7 +91,7 @@ func main() {
 
 	// Create the provisioner: it implements the Provisioner interface expected by
 	// the controller
-	flexProvisioner := vol.NewFlexProvisioner(clientset, *execCommand, flexvolumeDir, driver)
+	flexProvisioner := vol.NewFlexProvisioner(clientset, *execCommand, driver)
 
 	// Start the provision controller which will dynamically provision NFS PVs
 	pc := controller.NewProvisionController(

@@ -3,6 +3,7 @@ FROM registry.bst-1.cns.bstjpc.com:5000/k8s-dev:v1.10 as build
 RUN mkdir -p /go/src/k8s-dev
 
 COPY get-container-id /go/src/k8s-dev/get-container-id
+COPY utils /go/src/k8s-dev/utils
 
 WORKDIR /go/src/k8s-dev/get-container-id
 

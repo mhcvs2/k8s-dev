@@ -12,7 +12,7 @@ RUN go build
 FROM registry.bst-1.cns.bstjpc.com:5000/debian:stretch-slim
 
 COPY --from=build /go/src/k8s-dev/get-container-id/get-container-id /usr/bin/get-container-id
-COPY docker /usr/bin/docker
+COPY bin/docker /usr/bin/docker
 COPY commit-job/run.sh /run.sh
 
 RUN apt-get update && \

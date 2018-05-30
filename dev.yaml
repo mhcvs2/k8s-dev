@@ -18,9 +18,9 @@ spec:
       containers:
       - name: kubernetes-development
 #        image: registry.bst-1.cns.bstjpc.com:5000/k8s-client-go:v1.10
-#        image: registry.bst-1.cns.bstjpc.com:5000/k8s-dev:v1.10
+        image: registry.bst-1.cns.bstjpc.com:5000/k8s-dev:v1.10
 #        image: registry.bst-1.cns.bstjpc.com:5000/debian:stretch-slim
-        image: registry.bst-1.cns.bstjpc.com:5000/flex-provisioner:20180529
+#        image: registry.bst-1.cns.bstjpc.com:5000/flex-provisioner:20180529
         imagePullPolicy: Always
         securityContext:
           privileged: true
@@ -33,6 +33,8 @@ spec:
           mountPath: /go/src/k8s-dev
         - name: kubeconfig
           mountPath: /root/.kube
+        - name: docker-sock
+          mountPath: /var/run/docker.sock
       volumes:
       - name: program
         hostPath:
@@ -40,6 +42,9 @@ spec:
       - name: kubeconfig
         hostPath:
           path: /root/.kube
+      - name: docker-sock
+        hostPath:
+          path: /var/run/docker.sock
       serviceAccountName: default
       nodeSelector:
         kubernetes.io/hostname: k8s-m1

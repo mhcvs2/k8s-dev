@@ -1,13 +1,42 @@
-kind: Pod
-apiVersion: v1
+apiVersion: apps/v1beta2
+kind: Deployment
 metadata:
-  name: flex-provisioner
+  name: cephfs-flex-provisioner
+  labels:
+    k8s-app: cephfs-flex-provisioner
+  namespace: provisioner
 spec:
-  containers:
-    - name: flex-provisioner
-      image: childsb/flex-provisioner
-      securityContext:
-      args:
-        - "-provisioner=external/flex-simple"
-        - "-execCommand=/opt/storage/flex-provision.sh"
-      imagePullPolicy: "IfNotPresent"
+  selector:
+    matchLabels:
+      k8s-app: cephfs-flex-provisioner
+  template:
+    metadata:
+      labels:
+        k8s-app: cephfs-flex-provisioner
+    spec:
+#      hostNetwork: true
+      containers:
+      - name: cephfs-flex-provisioner
+        image: registry.bst-1.cns.bstjpc.com:5000/flex-provisioner:20180529
+        imagePullPolicy: Always
+        securityContext:
+          privileged: true
+        command:
+          - flex-provisioner
+          - -execCommand
+          - "/opt/cephfs"
+          - -provisioner
+          - srcb.com/cephfs
+        volumeMounts:
+        - name: script
+          mountPath: /opt/cephfs
+        env:
+        - name: DRIVER
+          value: "srcb/cephfs"
+      volumes:
+      - name: script
+        hostPath:
+          path: /var/lib/kubelet/volumeplugins/srcb~cephfs/cephfs
+      serviceAccountName: local-storage-admin
+      nodeSelector:
+        role: master

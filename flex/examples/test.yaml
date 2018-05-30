@@ -1,19 +1,29 @@
+kind: PersistentVolumeClaim
+apiVersion: v1
+metadata:
+  name: tesst-provisioner-1
+spec:
+  storageClassName: cephfs-flex-volume
+  accessModes:
+    - ReadWriteMany
+  resources:
+    requests:
+      storage: 1Gi
+---
 apiVersion: apps/v1beta1
 kind: Deployment
 metadata:
-  name: cephfs-test1
+  name: tesst-provisioner-1
   labels:
-    app: cephfs-test1
+    app: tesst-provisioner-1
 spec:
   strategy:
     type: Recreate
   template:
     metadata:
       labels:
-        app: cephfs-test1
+        app: tesst-provisioner-1
     spec:
-#      nodeSelector:
-#        kubernetes.io/hostname: k8s-n1
       containers:
       - image: registry.bst-1.cns.bstjpc.com:5000/clusterhq/fio-tool:latest
         name: fio
@@ -26,6 +36,5 @@ spec:
           mountPath: /data
       volumes:
       - name: fio-test-pv
-#        emptyDir: {}
         persistentVolumeClaim:
-          claimName: test-pv1
+          claimName: tesst-provisioner-1

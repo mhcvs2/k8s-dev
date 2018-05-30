@@ -53,5 +53,5 @@ func main() {
 	}
 	pod := pods.Items[0]
 	firstContainer := pod.Status.ContainerStatuses[0]
-	fmt.Println(strings.TrimLeft(firstContainer.ContainerID,"docker://"))
+	fmt.Println(strings.Split(firstContainer.ContainerID,"docker://")[1])
 }

@@ -18,10 +18,11 @@ spec:
       containers:
       - name: kubernetes-development
 #        image: registry.bst-1.cns.bstjpc.com:5000/k8s-client-go:v1.10
-        image: registry.bst-1.cns.bstjpc.com:5000/k8s-dev:v1.10
+#        image: registry.bst-1.cns.bstjpc.com:5000/k8s-dev:v1.10
 #        image: registry.bst-1.cns.bstjpc.com:5000/debian:stretch-slim
 #        image: registry.bst-1.cns.bstjpc.com:5000/flex-provisioner:20180529
 #        image: registry.bst-1.cns.bstjpc.com:5000/k8s1-10-docker-1-38:180530
+        image: registry.bst-1.cns.bstjpc.com:5000/docker-commit-push:20180530
         imagePullPolicy: Always
         securityContext:
           privileged: true

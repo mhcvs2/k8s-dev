@@ -1,0 +1,82 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: test-job001-commit-job
+  labels:
+    app: commit-job
+    chart: commit-job-0.1.0
+    release: test-job001
+    heritage: Tiller
+  namespace: data-intelligent-lab
+spec:
+  backoffLimit: 3
+  activeDeadlineSeconds: 300
+  template:
+    spec:
+      affinity:
+        podAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+          - labelSelector:
+              matchExpressions:
+              - key: release
+                operator: In
+                values:
+                - hongchao.ma-dev1
+            topologyKey: kubernetes.io/hostname
+      volumes:
+      - name: docker-sock
+        hostPath:
+          path: /var/run/docker.sock
+      - name: share
+        emptyDir: {}
+      containers:
+      - name: commit-push
+        image: registry.bst-1.cns.bstjpc.com:5000/docker-commit-push:20180528
+        imagePullPolicy: Always
+        command:
+        - sh
+        - -c
+        - "tail -f /dev/null"
+        resources:
+          limits:
+            cpu: 50m
+            memory: 100Mi
+        volumeMounts:
+        - name: docker-sock
+          mountPath: /var/run/docker.sock
+        - name: share
+          mountPath: /share
+        env:
+        - name: IMAGE_NAME
+          value:  registry.bst-1.cns.bstjpc.com:5000/test-name
+        - name: MY_NAMESPACE
+          valueFrom:
+            fieldRef:
+              fieldPath: metadata.namespace
+        - name: SELECT_LABEL
+          value: release=hongchao.ma-dev1
+      restartPolicy: Never
+      serviceAccountName: data-intelligent-lab-admin
+      initContainers:
+      - name: get-container-id
+        image: registry.bst-1.cns.bstjpc.com:5000/get-container-id:20180528
+        imagePullPolicy: Always
+        command:
+        - bash
+        - -c
+        - "get-container-id -n ${MY_NAMESPACE} -l ${SELECT_LABEL} > /share/container_id"
+        env:
+        - name: MY_NAMESPACE
+          valueFrom:
+            fieldRef:
+              fieldPath: metadata.namespace
+        - name: SELECT_LABEL
+          value: release=hongchao.ma-dev1
+        resources:
+          limits:
+            cpu: 50m
+            memory: 100Mi
+        volumeMounts:
+        - name: share
+          mountPath: /share
+

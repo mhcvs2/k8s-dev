@@ -22,6 +22,8 @@ func main() {
 
 	containerID := "cf5e220dd86c50548e4488c2cbe947be1abd0076ee095990f9a17567621a7636"
 
-	cli.ContainerCommit(ctx, containerID, commitOptions)
+	_, err = cli.ContainerCommit(ctx, containerID, commitOptions)
+
+	cli.ImagePush()
 }
 

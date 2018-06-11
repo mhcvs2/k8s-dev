@@ -39,9 +39,9 @@ func main() {
 
 	stopCh := make(chan struct{})
 	sharedInformerFactory.Start(stopCh)
-
+	time.Sleep(time.Second * 5)
 	podLister := sharedInformerFactory.Core().V1().Pods().Lister()
-	pods1, err := podLister.List(labels.Nothing())
+	pods1, err := podLister.List(labels.NewSelector())
 	if err != nil {
 		panic(err.Error())
 	}
@@ -51,7 +51,7 @@ func main() {
 	}
 	fmt.Println()
 
-	pods2, err := podLister.Pods("kube-system").List(labels.Nothing())
+	pods2, err := podLister.Pods("kube-system").List(labels.Everything())
 	if err != nil {
 		panic(err.Error())
 	}
@@ -60,4 +60,9 @@ func main() {
 		fmt.Printf("%s ", p.Name)
 	}
 	fmt.Println()
+	p, err := podLister.Pods("kube-system").Get("swagger-ddd5d766c-xrwnr")
+	if err != nil {
+		panic(err.Error())
+	}
+	fmt.Println(p.Name)
 }

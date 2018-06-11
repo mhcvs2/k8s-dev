@@ -9,6 +9,9 @@ import (
 	"path/filepath"
 	"os"
 	"k8s.io/client-go/tools/clientcmd"
+	"k8s.io/client-go/informers"
+	"time"
+	extensions "k8s.io/api/extensions/v1beta1"
 )
 
 func homeDir() string {
@@ -19,7 +22,7 @@ func homeDir() string {
 }
 
 func main() {
-	ns := flag.String("ns", "default", "namespace name")
+	ns := flag.String("ns", "kube-system", "namespace name")
 	flag.Parse()
 	config, err := rest.InClusterConfig()
 	if err != nil {
@@ -36,9 +39,15 @@ func main() {
 		panic(err.Error())
 	}
 
-	deployments, err := clientset.AppsV1beta1().Deployments(*ns).List(metav1.ListOptions{})
-	fmt.Printf("deployments in namespace %s:\n", *ns)
-	for _, deploy := range deployments.Items {
-		fmt.Println(deploy.Name)
+	resyncPeriod := 5 * time.Second
+
+	infFactory := informers.NewFilteredSharedInformerFactory(clientset, resyncPeriod, *ns, func(*metav1.ListOptions) {})
+	ingress := infFactory.Extensions().V1beta1().Ingresses().Informer()
+	store := ingress.GetStore()
+	is := store.List()
+	fmt.Println(len(is))
+	for _, i := range is {
+		j := i.(*extensions.Ingress)
+		fmt.Println(j.Name)
 	}
 }

@@ -1,0 +1,46 @@
+apiVersion: apps/v1beta2
+kind: Deployment
+metadata:
+  name: ingress-watcher
+  labels:
+    k8s-app: ingress-watcher
+  namespace: kube-system
+spec:
+  selector:
+    matchLabels:
+      k8s-app: ingress-watcher
+  template:
+    metadata:
+      labels:
+        k8s-app: ingress-watcher
+    spec:
+      containers:
+      - name: ingress-watcher
+        image: registry.bst-1.cns.bstjpc.com:5000/ingress-watcher:20180612
+        imagePullPolicy: Always
+        command:
+          - ingress-watcher
+          - -debug
+        volumeMounts:
+        - name: etcdssl
+          mountPath: /etc/etcd/ssl
+        env:
+        - name: ETCDENDPOINTS
+          value: "https://109.105.1.253:2379,https://109.105.1.254:2379,https://109.105.1.209:2379,https://109.105.1.208:2379,https://109.105.1.246:2379"
+        - name: ETCDCTL_CA_FILE
+          value: /etc/etcd/ssl/etcd-ca.pem
+        - name: ETCDCTL_CERT_FILE
+          value: /etc/etcd/ssl/etcd.pem
+        - name: ETCDCTL_KEY_FILE
+          value: /etc/etcd/ssl/etcd-key.pem
+        - name: WATCH_KEY
+          value: /confd-dns/gpu-infra/dns/names
+        - name: BASE_DOMAIN
+          value: gcloud.srcb.com
+      volumes:
+      - name: etcdssl
+        hostPath:
+          path: /etc/etcd/ssl
+      serviceAccountName: default
+      nodeSelector:
+        role: master

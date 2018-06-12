@@ -68,9 +68,9 @@ func (ing *IngressWatcher) addData(names ...string) bool {
 		if !ing.data.Contains(name) {
 			ing.data.Add(name)
 			change = true
-			log.Infof("Add domain %s\n", name)
+			log.Infof("Add domain %s", name)
 		} else {
-			log.Debugf("name %s exist, ignore it\n", name)
+			log.Debugf("name %s exist, ignore it", name)
 		}
 	}
 	return change
@@ -85,9 +85,9 @@ func (ing *IngressWatcher) deleteData(names ...string) bool {
 		if ing.data.Contains(name) {
 			ing.data.Remove(name)
 			change = true
-			log.Infof("Delete domain %s\n", name)
+			log.Infof("Delete domain %s", name)
 		} else {
-			log.Debugf("name %s does exist, ignore it\n", name)
+			log.Debugf("name %s does exist, ignore it", name)
 		}
 	}
 	return change

@@ -69,42 +69,15 @@ func main() {
 	fmt.Println(serviceLister)
 	fmt.Println(jobLister)
 
-	//pods1, err := podLister.List(labels.NewSelector())
-	//if err != nil {
-	//	panic(err.Error())
-	//}
-	//fmt.Println(len(pods1))
-	//for _, p := range pods1 {
-	//	fmt.Printf("%s ", p.Name)
-	//}
-	//fmt.Println()
-
-	//pods2, err := podLister.Pods("kube-system").List(labels.Everything())
-	//if err != nil {
-	//	panic(err.Error())
-	//}
-	//fmt.Println(len(pods2))
-	//for _, p := range pods2 {
-	//	fmt.Printf("%s ", p.Name)
-	//}
-	//fmt.Println()
-	//p, err := podLister.Pods("kube-system").Get("haproxy-k8s-ceph5")
-	//if err != nil {
-	//	panic(err.Error())
-	//}
-	//fmt.Println(p.Name)
-
-	//获取一个开发环境的ssh端口
-	//sshPortSelector := labels.NewSelector()
+	////获取一个开发环境的ssh端口
 	//sshPortRequirement, _ := labels.NewRequirement("release", selection.Equals, []string{"hongchao.ma-dev1"})
-	//sshPortSelector.Add(*sshPortRequirement)
+	//sshPortSelector := labels.NewSelector().Add(*sshPortRequirement)
 	//services, _ := serviceLister.Services("test-lab").List(sshPortSelector)
 	//fmt.Println(services[0].Spec.Ports[0].NodePort)
-
-	//获取lab内所有开发容器
-	//devSituationSelector := labels.NewSelector()
+	//
+	////获取lab内所有开发容器
 	//devSituationRequirement, _ := labels.NewRequirement("app", selection.Equals, []string{"dev-situation"})
-	//devSituationSelector.Add(*devSituationRequirement)
+	//devSituationSelector := labels.NewSelector().Add(*devSituationRequirement)
 	//devPods, err := podLister.Pods("test-lab").List(devSituationSelector)
 	//var containerStatus v1.ContainerStatus
 	//for i, dp := range devPods {
@@ -116,18 +89,17 @@ func main() {
 	//}
 
 	//获取指定用户的开发容器
-	//devSituationSelector := labels.NewSelector()
 	//devSituationRequirement, _ := labels.NewRequirement("app", selection.Equals, []string{"dev-situation"})
 	//devSituationRequirement2, _ := labels.NewRequirement("user", selection.Equals, []string{"hongchao-ma"})
-	//devSituationSelector.Add(*devSituationRequirement, *devSituationRequirement2)
+	//devSituationSelector := labels.NewSelector().Add(*devSituationRequirement, *devSituationRequirement2)
 	//devPods, err := podLister.Pods("test-lab").List(devSituationSelector)
 	//var containerStatus v1.ContainerStatus
 	//for i, dp := range devPods {
 	//	containerStatus = dp.Status.ContainerStatuses[0]
 	//	fmt.Printf("第%d个dev situation---------------\n", i)
-	//  if dp.Status.StartTime != nil {
+	// if dp.Status.StartTime != nil {
 	//	   fmt.Printf("Start time: %s\n", dp.Status.StartTime.String())
-	// }
+	//}
 	//	fmt.Printf("image name is %s\n", containerStatus.Image)
 	//	fmt.Printf("state is %s\n", GetContainerStatus(containerStatus.State))
 	//}

@@ -179,9 +179,7 @@ func GetJobStatus(state batchv1.JobStatus) string {
 	return "wait"
 }
 
-func GetResourceName(origin string) (res string) {
-	pattern := "cpu|memory|gpu.*"
-	obj := regexp.MustCompile(pattern)
-	res = obj.FindString(origin)
-	return
+func GetResourceName(origin string) string {
+	return regexp.MustCompile("cpu|memory|gpu.*").FindString(origin)
+
 }

@@ -13,9 +13,9 @@ import (
 	"k8s.io/apimachinery/pkg/util/runtime"
 	"os/signal"
 	"k8s.io/api/core/v1"
-	"k8s.io/apimachinery/pkg/labels"
-	"k8s.io/apimachinery/pkg/selection"
 	batchv1 "k8s.io/api/batch/v1"
+	"regexp"
+	"k8s.io/apimachinery/pkg/labels"
 )
 
 func homeDir() string {
@@ -48,9 +48,11 @@ func main() {
 	podInformer := sharedInformerFactory.Core().V1().Pods().Informer()
 	serviceInformer := sharedInformerFactory.Core().V1().Services().Informer()
 	jobInformer := sharedInformerFactory.Batch().V1().Jobs().Informer()
+	quotaInformer := sharedInformerFactory.Core().V1().ResourceQuotas().Informer()
 	go podInformer.Run(stopCh)
 	go serviceInformer.Run(stopCh)
 	go jobInformer.Run(stopCh)
+	go quotaInformer.Run(stopCh)
 
 	if !cache.WaitForCacheSync(stopCh,
 		podInformer.HasSynced,
@@ -65,9 +67,11 @@ func main() {
 	podLister := sharedInformerFactory.Core().V1().Pods().Lister()
 	serviceLister := sharedInformerFactory.Core().V1().Services().Lister()
 	jobLister := sharedInformerFactory.Batch().V1().Jobs().Lister()
+	quotaLister := sharedInformerFactory.Core().V1().ResourceQuotas().Lister()
 	fmt.Println(podLister)
 	fmt.Println(serviceLister)
 	fmt.Println(jobLister)
+	fmt.Println(quotaLister)
 
 	////获取一个开发环境的ssh端口
 	//sshPortRequirement, _ := labels.NewRequirement("release", selection.Equals, []string{"hongchao.ma-dev1"})
@@ -105,19 +109,40 @@ func main() {
 	//}
 
 	//获取指定用户运行任务的job
-	runJobRequirement, _ := labels.NewRequirement("app", selection.In, []string{"run-job"})
-	runJobRequirement2, _ := labels.NewRequirement("user", selection.In, []string{"admin"})
-	runJobSelector := labels.NewSelector().Add(*runJobRequirement, *runJobRequirement2)
-	runJobs, _ := jobLister.Jobs("intelligence-data-lab").List(runJobSelector)
-	for i, rj := range runJobs {
-		fmt.Printf("第%d个job---------------\n", i)
-		if rj.Status.StartTime != nil {
-			fmt.Printf("Start time: %s\n", rj.Status.StartTime.String())
-		}
+	//runJobRequirement, _ := labels.NewRequirement("app", selection.In, []string{"run-job"})
+	//runJobRequirement2, _ := labels.NewRequirement("user", selection.In, []string{"admin"})
+	//runJobSelector := labels.NewSelector().Add(*runJobRequirement, *runJobRequirement2)
+	//runJobs, _ := jobLister.Jobs("intelligence-data-lab").List(runJobSelector)
+	//for i, rj := range runJobs {
+	//	fmt.Printf("第%d个job---------------\n", i)
+	//	if rj.Status.StartTime != nil {
+	//		fmt.Printf("Start time: %s\n", rj.Status.StartTime.String())
+	//	}
+	//
+	//	fmt.Printf("image name is %s\n", rj.Spec.Template.Spec.Containers[0].Image)
+	//	fmt.Printf("state is %s\n", GetJobStatus(rj.Status))
+	//}
 
-		fmt.Printf("image name is %s\n", rj.Spec.Template.Spec.Containers[0].Image)
-		fmt.Printf("state is %s\n", GetJobStatus(rj.Status))
+	//获取resource quota
+	//获取所有quota
+	//quotas, _ := quotaLister.List(labels.Everything())
+	//for _, quota := range quotas {
+	//	fmt.Printf("lab: %s\n",quota.ObjectMeta.Namespace)
+	//	for k, v := range quota.Status.Used {
+	//		total, _ := quota.Status.Hard[k]
+	//		fmt.Printf("resource name: %s, total %s,  use %s\n", GetResourceName(string(k)), total.String(), v.String())
+	//	}
+	//}
+	//获取指定lab 的 quota
+	quotas, _ := quotaLister.ResourceQuotas("intelligence-innovation-lab").List(labels.Everything())
+	if len(quotas) > 0 {
+		quota := quotas[0]
+		for k, v := range quota.Status.Used {
+			total, _ := quota.Status.Hard[k]
+			fmt.Printf("resource name: %s, total %s,  use %s\n", GetResourceName(string(k)), total.String(), v.String())
+		}
 	}
+
 
 	select {
 	case <-stopCh:
@@ -152,4 +177,11 @@ func GetJobStatus(state batchv1.JobStatus) string {
 		return "failed"
 	}
 	return "wait"
+}
+
+func GetResourceName(origin string) (res string) {
+	pattern := "cpu|memory|gpu.*"
+	obj := regexp.MustCompile(pattern)
+	res = obj.FindString(origin)
+	return
 }

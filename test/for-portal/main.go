@@ -16,6 +16,8 @@ import (
 	batchv1 "k8s.io/api/batch/v1"
 	"regexp"
 	"k8s.io/apimachinery/pkg/labels"
+	"strings"
+	"k8s.io/apimachinery/pkg/api/resource"
 )
 
 func homeDir() string {
@@ -123,6 +125,22 @@ func main() {
 	//	fmt.Printf("state is %s\n", GetJobStatus(rj.Status))
 	//}
 
+	//获取指定用户运行任务的job
+	//runJobRequirement, _ := labels.NewRequirement("app", selection.In, []string{"commit-job"})
+	////runJobRequirement2, _ := labels.NewRequirement("user", selection.In, []string{"admin"})
+	//runJobRequirement2, _ := labels.NewRequirement("user", selection.In, []string{"hongchao-ma"})
+	//runJobSelector := labels.NewSelector().Add(*runJobRequirement, *runJobRequirement2)
+	//runJobs, _ := jobLister.Jobs("intelligence-data-lab").List(runJobSelector)
+	//for i, rj := range runJobs {
+	//	fmt.Printf("第%d个job---------------\n", i)
+	//	if rj.Status.StartTime != nil {
+	//		fmt.Printf("Start time: %s\n", rj.Status.StartTime.String())
+	//	}
+	//
+	//	fmt.Printf("image name is %s\n", rj.Spec.Template.Spec.Containers[0].Image)
+	//	fmt.Printf("state is %s\n", GetJobStatus(rj.Status))
+	//}
+
 	//获取resource quota
 	//获取所有quota
 	//quotas, _ := quotaLister.List(labels.Everything())
@@ -134,15 +152,37 @@ func main() {
 	//	}
 	//}
 	//获取指定lab 的 quota
-	quotas, _ := quotaLister.ResourceQuotas("intelligence-innovation-lab").List(labels.Everything())
+	//quotas, _ := quotaLister.ResourceQuotas("intelligence-data-lab").List(labels.Everything())
+	//if len(quotas) > 0 {
+	//	quota := quotas[0]
+	//	for k, v := range quota.Status.Used {
+	//		total, _ := quota.Status.Hard[k]
+	//		fmt.Printf("resource name: %s, total %s,  use %s\n", GetResourceName(string(k)), total.String(), v.String())
+	//	}
+	//}
+
+	//修改lab的quota
+	quotas, _ := quotaLister.ResourceQuotas("intelligence-data-lab").List(labels.Everything())
 	if len(quotas) > 0 {
 		quota := quotas[0]
 		for k, v := range quota.Status.Used {
 			total, _ := quota.Status.Hard[k]
 			fmt.Printf("resource name: %s, total %s,  use %s\n", GetResourceName(string(k)), total.String(), v.String())
 		}
-	}
 
+		fmt.Println("---------------------------------")
+		resourceName := "k20m"
+		newQuantity := 4
+		exactResourceName, _ := GetExactKeyName(resourceName, quota.Spec.Hard)
+		quantity := resource.Quantity{}
+		quantity.Set(int64(newQuantity))
+		quota.Spec.Hard[exactResourceName] = quantity
+
+		_, err = clientset.CoreV1().ResourceQuotas("intelligence-data-lab").Update(quota)
+		if err != nil {
+			panic(err)
+		}
+	}
 
 	select {
 	case <-stopCh:
@@ -181,5 +221,15 @@ func GetJobStatus(state batchv1.JobStatus) string {
 
 func GetResourceName(origin string) string {
 	return regexp.MustCompile("cpu|memory|gpu.*").FindString(origin)
-
 }
+
+func GetExactKeyName(simpleName string, list v1.ResourceList) (v1.ResourceName, error) {
+	for k := range list {
+		if strings.Contains(k.String(), simpleName) {
+			return k, nil
+		}
+	}
+	return "", fmt.Errorf("resource %s not found", simpleName)
+}
+
+

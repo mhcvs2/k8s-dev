@@ -46,6 +46,10 @@ gen_push_cmd(){
  push_cmd="${docker_cmd} push"
 }
 
+gen_rmi_cmd(){
+ rmi_cmd="${docker_cmd} rmi"
+}
+
 run_cmd(){
  echo $@
  eval $@
@@ -56,6 +60,7 @@ main(){
  gen_docker_cmd
  gen_commit_cmd
  gen_push_cmd
+ gen_rmi_cmd
 
  if [ "${image_tag}" = "" ]; then
   image_tag=latest
@@ -76,6 +81,7 @@ main(){
 
  run_cmd "${commit_cmd} ${container_id} ${image_name}:${image_tag}"
  run_cmd "${push_cmd} ${image_name}:${image_tag}"
+ run_cmd "${rmi_cmd} ${image_name}:${image_tag}"
 }
 
 main

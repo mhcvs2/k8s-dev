@@ -15,9 +15,10 @@ import (
 	"k8s.io/api/core/v1"
 	batchv1 "k8s.io/api/batch/v1"
 	"regexp"
-	"k8s.io/apimachinery/pkg/labels"
 	"strings"
-	"k8s.io/apimachinery/pkg/api/resource"
+	"k8s.io/apimachinery/pkg/labels"
+	"k8s.io/apimachinery/pkg/selection"
+	"strconv"
 )
 
 func homeDir() string {
@@ -162,25 +163,44 @@ func main() {
 	//}
 
 	//修改lab的quota
-	quotas, _ := quotaLister.ResourceQuotas("intelligence-data-lab").List(labels.Everything())
-	if len(quotas) > 0 {
-		quota := quotas[0]
-		for k, v := range quota.Status.Used {
-			total, _ := quota.Status.Hard[k]
-			fmt.Printf("resource name: %s, total %s,  use %s\n", GetResourceName(string(k)), total.String(), v.String())
-		}
+	//quotas, _ := quotaLister.ResourceQuotas("intelligence-data-lab").List(labels.Everything())
+	//if len(quotas) > 0 {
+	//	quota := quotas[0]
+	//	for k, v := range quota.Status.Used {
+	//		total, _ := quota.Status.Hard[k]
+	//		fmt.Printf("resource name: %s, total %s,  use %s\n", GetResourceName(string(k)), total.String(), v.String())
+	//	}
+	//
+	//	fmt.Println("---------------------------------")
+	//	resourceName := "k20m"
+	//	newQuantity := 5
+	//	fmt.Println(quota.Spec.Hard)
+	//	exactResourceName, _ := GetExactKeyName(resourceName, quota.Spec.Hard)
+	//	quantity := resource.Quantity{}
+	//	quantity.Set(int64(newQuantity))
+	//	quota.Spec.Hard[exactResourceName] = quantity
+	//
+	//	_, err = clientset.CoreV1().ResourceQuotas("intelligence-data-lab").Update(quota)
+	//	if err != nil {
+	//		panic(err)
+	//	}
+	//}
 
-		fmt.Println("---------------------------------")
-		resourceName := "k20m"
-		newQuantity := 4
-		exactResourceName, _ := GetExactKeyName(resourceName, quota.Spec.Hard)
-		quantity := resource.Quantity{}
-		quantity.Set(int64(newQuantity))
-		quota.Spec.Hard[exactResourceName] = quantity
-
-		_, err = clientset.CoreV1().ResourceQuotas("intelligence-data-lab").Update(quota)
-		if err != nil {
-			panic(err)
+	//获取每个lab的gpu资源使用情况(正在使用的)
+	devSituationRequirement, _ := labels.NewRequirement("type", selection.Equals, []string{"gpu-infra"})
+	devSituationSelector := labels.NewSelector().Add(*devSituationRequirement)
+	devPods, err := podLister.Pods("machine-learning-lab").List(devSituationSelector)
+	var containerStatus v1.ContainerStatus
+	for _, dp := range devPods {
+		containerStatus = dp.Status.ContainerStatuses[0]
+		if containerStatus.Ready {
+			user, _ := dp.ObjectMeta.Labels["user"]
+			singleId := strings.Replace(user, "-", ".", -1)
+			fmt.Println("user: ", singleId)
+			for k, v := range dp.Spec.Containers[0].Resources.Limits {
+				number, _ := strconv.Atoi(v.String())
+				fmt.Printf("gpu type: %s, number is %d\n", GetResourceName(k.String()), number)
+			}
 		}
 	}
 

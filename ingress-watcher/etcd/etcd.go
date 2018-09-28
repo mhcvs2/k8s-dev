@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"strings"
 	"errors"
+	"sync"
 )
 
 const (
@@ -20,6 +21,7 @@ type EtcdV2 struct {
 	runner exec.Interface
 	execPath string
 	args []string
+	lock *sync.RWMutex
 }
 
 func NewEtcdV2() *EtcdV2 {
@@ -37,11 +39,14 @@ func NewEtcdV2() *EtcdV2 {
 		runner: exec.New(),
 		execPath: EXECPATH,
 		args:args,
+		lock: new(sync.RWMutex),
 	}
 }
 
 func (e EtcdV2)Get(key string) ([]byte, error) {
-	args := []string{}
+	e.lock.RLock()
+	defer e.lock.RUnlock()
+	args := make([]string, 0)
 	args = append(args, e.args...)
 	args = append(args, "get", key)
 	cmd := e.runner.Command(e.execPath, args...)
@@ -53,7 +58,9 @@ func (e EtcdV2)Get(key string) ([]byte, error) {
 }
 
 func (e EtcdV2) Set(key, value string) error {
-	args := []string{}
+	e.lock.Lock()
+	defer e.lock.Unlock()
+	args := make([]string, 0)
 	args = append(args, e.args...)
 	args = append(args, "set", key, value)
 	cmd := e.runner.Command(e.execPath, args...)

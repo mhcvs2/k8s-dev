@@ -29,6 +29,7 @@ type IngressWatcher struct {
 	baseDomain string
 }
 
+//NewIngressWatcher 初始化watcher
 func NewIngressWatcher(clientset *kubernetes.Clientset) *IngressWatcher {
 	sharedInformerFactory := informers.NewSharedInformerFactory(clientset, time.Minute*10)
 	ingInformer := sharedInformerFactory.Extensions().V1beta1().Ingresses().Informer()
@@ -43,6 +44,7 @@ func NewIngressWatcher(clientset *kubernetes.Clientset) *IngressWatcher {
 	}
 }
 
+// getData 将etcd中watchKey的值解析成域名的列表，加入到data集合中
 func (ing *IngressWatcher) getData() error {
 	out, err := ing.etcd.Get(ing.watchKey)
 	if err != nil {
@@ -59,6 +61,7 @@ func (ing *IngressWatcher) getData() error {
 	return nil
 }
 
+//addData 将需要增加的域名放入data集合中，返回data集合是否有变化
 func (ing *IngressWatcher) addData(names ...string) bool {
 	change := false
 	for _, name := range names {
@@ -76,6 +79,7 @@ func (ing *IngressWatcher) addData(names ...string) bool {
 	return change
 }
 
+//deleteData 从data集合中删除域名，返回data集合是否有变化
 func (ing *IngressWatcher) deleteData(names ...string) bool {
 	change := false
 	for _, name := range names {
@@ -93,6 +97,7 @@ func (ing *IngressWatcher) deleteData(names ...string) bool {
 	return change
 }
 
+//getDomainName 判断域名是不是以baseDomain结尾的，如果是，返回不包含baseDomain的部分，否则返回空字符串
 func (ing *IngressWatcher) getDomainName(host string) string {
 	reg := regexp.MustCompile(fmt.Sprintf("%s$", ing.baseDomain))
 	endWith := reg.MatchString(host)
@@ -130,6 +135,7 @@ func (ing *IngressWatcher) Run(stopCh chan struct{}) {
 	ing.informer.AddEventHandler(ingEventHandler)
 }
 
+//updateEtcd 更新etcd中watchKey的值
 func (i *IngressWatcher) updateEtcd(eles []interface{}) {
 	if out, err := json.Marshal(eles); err != nil {
 		log.Errorf("Marshal error: %s\n", err.Error())
@@ -142,7 +148,7 @@ func (i *IngressWatcher) updateEtcd(eles []interface{}) {
 }
 
 //-----------------------------------------------
-
+//add 增加一个ingress的回调函数
 func (i *IngressWatcher) add(obj interface{}) {
 	ing := obj.(*v1beta1.Ingress)
 	rules := ing.Spec.Rules
@@ -156,6 +162,7 @@ func (i *IngressWatcher) add(obj interface{}) {
 	}
 }
 
+//del 删除一个ingress的回调函数
 func (i *IngressWatcher) del(obj interface{}) {
 	ing := obj.(*v1beta1.Ingress)
 	rules := ing.Spec.Rules
@@ -169,6 +176,7 @@ func (i *IngressWatcher) del(obj interface{}) {
 	}
 }
 
+//update 更新一个ingress的回调函数
 func (i *IngressWatcher) update(old, cur interface{}) {
 	oldIng := old.(*v1beta1.Ingress)
 	curIng := cur.(*v1beta1.Ingress)

@@ -16,7 +16,7 @@ import (
 
 func main() {
 	ns := flag.String("n", "default", "namespace name")
-	label := flag.String("l", "", "namespace name")
+	label := flag.String("l", "", "label name")
 	flag.Parse()
 
 	kubeconfig := filepath.Join(myutils.HomeDir(), ".kube", "config")

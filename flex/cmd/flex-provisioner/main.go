@@ -19,7 +19,6 @@ package main
 import (
 	"flag"
 	"strings"
-
 	"github.com/golang/glog"
 	vol "k8s-dev/flex/pkg/volume"
 	"k8s-dev/lib/controller"

@@ -186,21 +186,35 @@ func main() {
 	//	}
 	//}
 
-	//获取每个lab的gpu资源使用情况(正在使用的)
+	////获取每个lab的gpu资源使用情况(正在使用的)
+	//devSituationRequirement, _ := labels.NewRequirement("type", selection.Equals, []string{"gpu-infra"})
+	//devSituationSelector := labels.NewSelector().Add(*devSituationRequirement)
+	//devPods, err := podLister.Pods("machine-learning-lab").List(devSituationSelector)
+	//var containerStatus v1.ContainerStatus
+	//for _, dp := range devPods {
+	//	containerStatus = dp.Status.ContainerStatuses[0]
+	//	if containerStatus.Ready {
+	//		user, _ := dp.ObjectMeta.Labels["user"]
+	//		singleId := strings.Replace(user, "-", ".", -1)
+	//		fmt.Println("user: ", singleId)
+	//		for k, v := range dp.Spec.Containers[0].Resources.Limits {
+	//			number, _ := strconv.Atoi(v.String())
+	//			fmt.Printf("podName: %s, gpu type: %s, number is %d\n", dp.Name, GetResourceName(k.String()), number)
+	//		}
+	//	}
+	//}
+
+	//获取每个lab的gpu资源使用情况
 	devSituationRequirement, _ := labels.NewRequirement("type", selection.Equals, []string{"gpu-infra"})
 	devSituationSelector := labels.NewSelector().Add(*devSituationRequirement)
 	devPods, err := podLister.Pods("machine-learning-lab").List(devSituationSelector)
-	var containerStatus v1.ContainerStatus
 	for _, dp := range devPods {
-		containerStatus = dp.Status.ContainerStatuses[0]
-		if containerStatus.Ready {
-			user, _ := dp.ObjectMeta.Labels["user"]
-			singleId := strings.Replace(user, "-", ".", -1)
-			fmt.Println("user: ", singleId)
-			for k, v := range dp.Spec.Containers[0].Resources.Limits {
-				number, _ := strconv.Atoi(v.String())
-				fmt.Printf("gpu type: %s, number is %d\n", GetResourceName(k.String()), number)
-			}
+		user, _ := dp.ObjectMeta.Labels["user"]
+		singleId := strings.Replace(user, "-", ".", -1)
+		fmt.Println("user: ", singleId)
+		for k, v := range dp.Spec.Containers[0].Resources.Limits {
+			number, _ := strconv.Atoi(v.String())
+			fmt.Printf("podName: %s, gpu type: %s, number is %d\n", dp.Name, GetResourceName(k.String()), number)
 		}
 	}
 

@@ -1,18 +1,17 @@
 package main
 
 import (
-	"k8s.io/client-go/kubernetes"
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-	"k8s.io/client-go/rest"
-	"fmt"
 	"flag"
-	"path/filepath"
+	"fmt"
 	myutils "k8s-dev/utils"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"k8s.io/client-go/kubernetes"
+	"k8s.io/client-go/rest"
 	"k8s.io/client-go/tools/clientcmd"
 	"os"
+	"path/filepath"
 	"strings"
 )
-
 
 func main() {
 	ns := flag.String("n", "default", "namespace name")
@@ -53,5 +52,5 @@ func main() {
 	}
 	pod := pods.Items[0]
 	firstContainer := pod.Status.ContainerStatuses[0]
-	fmt.Println(strings.Split(firstContainer.ContainerID,"docker://")[1])
+	fmt.Println(strings.Split(firstContainer.ContainerID, "docker://")[1])
 }

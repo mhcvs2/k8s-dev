@@ -8,6 +8,9 @@ k8s.io/klog
 k8s.io/utils
 k8s.io/code-generator/...
 github.com/golang/glog
+github.com/googleapis/gnostic
+github.com/golang/protobuf
+k8s.io/kube-openapi/pkg/util/proto
 )
 
 

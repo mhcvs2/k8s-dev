@@ -27,8 +27,9 @@ func t1() {
 	} else {
 		fmt.Println("not exist")
 	}
+	fmt.Println("===============")
 
-	if data, err := s.Index("list", "bbc"); err != nil {
+	if data, err := s.Index("list", "dsfdsf"); err != nil {
 		fmt.Println("err: " + err.Error())
 	} else {
 		fmt.Println(data)

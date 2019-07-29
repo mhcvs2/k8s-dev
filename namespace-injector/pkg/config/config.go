@@ -17,6 +17,8 @@ var (
 	BashCmd string
 	NamespaceLabelSelectors string
 	ConfigMapNamespace string
+	CacheDir = "/tmp/namespace_injector"
+	ComfigMapLabel = "namespace-inject"
 )
 
 func init() {

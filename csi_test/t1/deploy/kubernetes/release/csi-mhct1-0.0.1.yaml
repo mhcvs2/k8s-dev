@@ -285,7 +285,7 @@ rules:
     verbs: ["get", "list"]
   - apiGroups: ["snapshot.storage.k8s.io"]
     resources: ["volumesnapshotclasses"]
-    verbs: ["get", "list", "watch"]
+    verbs: ["get", "list", "watch"]z
   - apiGroups: ["snapshot.storage.k8s.io"]
     resources: ["volumesnapshotcontents"]
     verbs: ["create", "get", "list", "watch", "update", "delete"]

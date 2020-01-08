@@ -31,9 +31,12 @@ func NewEtcdV2() *EtcdV2 {
 	keyfile := os.Getenv(ENV_ETCDCTL_KEY_FILE)
 	args := []string{
 		fmt.Sprintf("--endpoints=%s", endpints),
-		fmt.Sprintf("--ca-file=%s", cafile),
-		fmt.Sprintf("--cert-file=%s", certfile),
-		fmt.Sprintf("--key-file=%s", keyfile),
+	}
+	if cafile != "" {
+		args = append(args,
+			fmt.Sprintf("--ca-file=%s", cafile),
+			fmt.Sprintf("--cert-file=%s", certfile),
+			fmt.Sprintf("--key-file=%s", keyfile))
 	}
 	return &EtcdV2{
 		runner: exec.New(),

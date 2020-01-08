@@ -1,4 +1,4 @@
-FROM registry.bst-1.cns.bstjpc.com:5000/k8s-dev:180612 as build
+FROM registry.cn-hangzhou.aliyuncs.com/mhc_dev/k8s-app-build-env:go-1.10 as build
 
 COPY ingress-watcher /go/src/k8s-dev/ingress-watcher
 
@@ -6,7 +6,7 @@ WORKDIR /go/src/k8s-dev/ingress-watcher
 
 RUN go build
 
-FROM registry.bst-1.cns.bstjpc.com:5000/debian:stretch-slim
+FROM debian:stretch-slim
 
 COPY --from=build /go/src/k8s-dev/ingress-watcher/ingress-watcher /usr/bin/ingress-watcher
 COPY ingress-watcher/etcdctl /usr/bin/etcdctl

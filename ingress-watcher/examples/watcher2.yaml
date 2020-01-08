@@ -1,0 +1,33 @@
+apiVersion: apps/v1beta2
+kind: Deployment
+metadata:
+  name: ingress-watcher
+  labels:
+    k8s-app: ingress-watcher
+  namespace: kube-system
+spec:
+  selector:
+    matchLabels:
+      k8s-app: ingress-watcher
+  template:
+    metadata:
+      labels:
+        k8s-app: ingress-watcher
+    spec:
+      imagePullSecrets:
+        - name: ksyunregistrykey
+      containers:
+      - name: ingress-watcher
+        image: hub.kce.ksyun.com/kbdp/ingress-watcher:latest
+        imagePullPolicy: Always
+        command:
+          - ingress-watcher
+          - -debug
+        env:
+        - name: ETCDENDPOINTS
+          value: "http://10.111.0.90:2379"
+        - name: WATCH_KEY
+          value: /confd/dbclud/dns/names
+        - name: BASE_DOMAIN
+          value: dbcloud.ksyun.com
+      serviceAccountName: default
